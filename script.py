@@ -48,6 +48,7 @@ class AESfiles:
         for (p, d, f) in os.walk(path):
             files += [os.path.join(p, filex) for filex in f]
         return files
+
 if __name__ == '__main__':
     window = Tk()
     window.title("Symetric Encryption")
@@ -79,7 +80,7 @@ if __name__ == '__main__':
         else:
             try:
                 print("\t\t\t---Decryption---")
-                window.filename = fd.askopenfilename(initialdir='/home/guest/tmp', title="Decrypt File", filetypes=(("all files", "*.*"),("jpg files", "*.jpg")))
+                window.filename = fd.askopenfilename(initialdir='/', title="Decrypt File", filetypes=(("all files", "*.*"),("jpg files", "*.jpg")))
                 password = keyX.get().encode()
                 key = hashlib.sha3_256(password).digest()
                 iv = ivX.get().encode()
@@ -91,7 +92,7 @@ if __name__ == '__main__':
                 ivX.delete(0, END)
                 popUp("The file has been decrypted!")
             except:
-                popUp("Select file")
+                popUp("Select file ")
     def encD():
         if ivX.get() == "" or keyX.get() == "":
             popUp("Input key and iv")
@@ -128,32 +129,31 @@ if __name__ == '__main__':
                 files = AESfiles.walk(path)
                 pad=""
                 for filex in files:
-                    print(filex)
-                    print("Key: " + password.decode())
                     AESfiles.decrypt(filex, key, iv, mode)
-
                 keyX.delete(0, END)
                 ivX.delete(0, END)
                 popUp("The files has been decrypted!")
             except:
                 popUp("Select directory")
-    Label (window, text="Encrypt files with AES", bg="black", fg="cyan4", font="none 14 bold").grid(row=1, column=0, sticky=W, pady=(6, 15))
+    def save():
+        try:
+            path = fd.askopenfilename(initialdir='/', title="Save to file" )
+            with open(path, "a") as f:
+                f.write(path + "\nKey: " + keyX.get() + "\t\t\t ----> IV: " + ivX.get() + "\n\n")
+            popUp("Keys were saved")
+        except:
+            popUp("Select File ")
 
-
+    Label (window, text="Encrypt files with AES", bg="black", fg="royalblue", font="none 18 bold").grid(row=0, column=0, sticky=W, pady=(6, 21))
     keyX = Entry(window, width=41, bg="black", fg="white")
     keyX.grid(row=3, column=0, columnspan=2, sticky=W)
-
     ivX = Entry(window, width=32, bg="black", fg="white")
     ivX.grid(row=5, column=0, sticky=W)
-
-    Label (window, text="Key", bg="black", fg="cyan3", font="none 10 bold").grid(row=2, column=0, sticky=W, padx=(3,0))
-    Label (window, text="IV", bg="black", fg="cyan3", font="none 10 bold").grid(row=4, column=0, sticky=W, pady=(27,0), padx=(3,0))
-
-    Button(window, text="Encrypt File", width=8, bg="dodgerblue", command=enc).grid(row=3, column=2, sticky=W, padx=(70,0))
-    Button(window, text="Decrypt File", width=8, bg="dodgerblue", command=dec).grid(row=4, column=2, sticky=W, pady=(6, 18), padx=(70,0))
-    
-
-    Button(window, text="Encrypt Directory", width=11, bg="dodgerblue", command=encD).grid(row=5, column=2, sticky=W, padx=(50,0))
-    Button(window, text="Decrypt Directory", width=11, bg="dodgerblue", command=decD).grid(row=6, column=2, sticky=W, padx=(50,0))
-    
+    Label (window, text="Key", bg="black", fg="cyan3", font="none 11 bold").grid(row=2, column=0, sticky=W, padx=(3,0))
+    Label (window, text="IV", bg="black", fg="cyan3", font="none 11 bold").grid(row=4, column=0, sticky=W, pady=(30,0), padx=(3,0))
+    Button(window, text="Encrypt File", width=9, bg="dodgerblue", command=enc).grid(row=3, column=2, sticky=W, padx=(70,0))
+    Button(window, text="Decrypt File", width=9, bg="dodgerblue", command=dec).grid(row=4, column=2, sticky=W, pady=(9, 18), padx=(70,0))
+    Button(window, text="Encrypt Directory", width=12, bg="dodgerblue", command=encD).grid(row=6, column=2, sticky=W, padx=(50,0), pady=(30,0))
+    Button(window, text="Decrypt Directory", width=12, bg="dodgerblue", command=decD).grid(row=7, column=2, sticky=W, padx=(50,0), pady=(9,0))
+    Button(window, text="Save keys", width=9, bg="cyan4", command=save).grid(row=7, column=0, sticky=W, padx=(0, 10))
     window.mainloop()
