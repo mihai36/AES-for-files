@@ -3,6 +3,7 @@ import hashlib
 import string
 import random
 import os
+import time
 from tkinter import *
 from tkinter import filedialog as fd
 from tkinter import messagebox
@@ -28,7 +29,6 @@ class AESfiles:
         with open(path, 'rb') as f:
             content = f.read()
         pcontent = AESfiles.pad_file(content)
-        print("IV: " + iv.decode() + pad)
         ct = cipher.encrypt(pcontent)
         with open(path, 'wb') as e:
             e.write(ct)
@@ -37,7 +37,6 @@ class AESfiles:
         cipher = AES.new(key, mode, iv)
         with open(path, 'rb') as f:
             content = f.read()
-        print("IV: " + iv.decode())
         pcontent = AESfiles.pad_file(content)
         pt = cipher.decrypt(pcontent)
         with open(path, 'wb') as e:
@@ -50,6 +49,8 @@ class AESfiles:
         return files
 
 if __name__ == '__main__':
+    opt=-1
+    path=""
     window = Tk()
     window.title("Symetric Encryption")
     window.configure(background="black")
@@ -60,17 +61,21 @@ if __name__ == '__main__':
             popUp("Input key and iv")
         else:
             try:
-                print("\t\t\t---Encryption---")
+                global opt
+                opt=0
+                print("\n\t\t\t---Encryption---")
                 window.filename = fd.askopenfilename(title="Encrypt File", filetypes=(("all files", "*.*"),("jpg files", "*.jpg")))
+                path = window.filename
                 password = keyX.get().encode()
                 key = hashlib.sha3_256(password).digest()
                 iv = ivX.get().encode()
                 mode = AES.MODE_CBC
-                print(window.filename)
-                print("Key: " + password.decode())
                 pad, ct = AESfiles.encrypt(window.filename, key, iv, mode)
                 ivX.insert(END, pad)
                 ivX.delete(16, END)
+                print(window.filename)
+                print("Key: " + keyX.get())
+                print("IV: " + ivX.get())
                 popUp("The file has been encrypted!")
             except:
                 popUp("Select file")
@@ -79,14 +84,14 @@ if __name__ == '__main__':
             popUp("Input key and iv")
         else:
             try:
-                print("\t\t\t---Decryption---")
-                window.filename = fd.askopenfilename(initialdir='/', title="Decrypt File", filetypes=(("all files", "*.*"),("jpg files", "*.jpg")))
+                print("\n\t\t\t---Decryption---")
+                window.filename = fd.askopenfilename(title="Decrypt File", filetypes=(("all files", "*.*"),("jpg files", "*.jpg")))
+                path = window.filename
                 password = keyX.get().encode()
                 key = hashlib.sha3_256(password).digest()
                 iv = ivX.get().encode()
                 mode = AES.MODE_CBC
                 print(window.filename)
-                print("Key: " + password.decode()) 
                 AESfiles.decrypt(window.filename, key, iv, mode)
                 keyX.delete(0, END)
                 ivX.delete(0, END)
@@ -98,20 +103,23 @@ if __name__ == '__main__':
             popUp("Input key and iv")
         else:
             try:
-                print("\t\t\t---Encryption---")
+                global opt
+                global path
+                opt=1
                 path = fd.askdirectory()
                 password = keyX.get().encode()
                 key = hashlib.sha3_256(password).digest()
                 iv = ivX.get().encode()
                 mode = AES.MODE_CBC
                 files = AESfiles.walk(path)
-                pad=""  
+                print("\n\t\t\t---Encryption---")
                 for filex in files:
                     print(filex)
-                    print("Key: " + password.decode())
                     pad, ct = AESfiles.encrypt(filex, key, iv, mode)
                 ivX.insert(END, pad)
                 ivX.delete(16, END)
+                print("Key: " + keyX.get())
+                print("IV: " + ivX.get() + "\n")
                 popUp("The files has been encrypted!")
             except:
                 popUp("Select directory")
@@ -120,15 +128,15 @@ if __name__ == '__main__':
             popUp("Input key and iv")
         else:
             try:
-                print("\t\t\t---Decryption---")
+                print("\n\t\t\t---Decryption---")
                 path = fd.askdirectory()
                 password = keyX.get().encode()
                 key = hashlib.sha3_256(password).digest()
                 iv = ivX.get().encode()
                 mode = AES.MODE_CBC
                 files = AESfiles.walk(path)
-                pad=""
                 for filex in files:
+                    print(filex)
                     AESfiles.decrypt(filex, key, iv, mode)
                 keyX.delete(0, END)
                 ivX.delete(0, END)
@@ -136,11 +144,19 @@ if __name__ == '__main__':
             except:
                 popUp("Select directory")
     def save():
+        global path
         try:
-            path = fd.askopenfilename(initialdir='/', title="Save to file" )
-            with open(path, "a") as f:
-                f.write(path + "\nKey: " + keyX.get() + "\t\t\t ----> IV: " + ivX.get() + "\n\n")
-            popUp("Keys were saved")
+            if opt == 0:
+                path = window.filename
+                pat = fd.askopenfilename(title="Save to file" )
+                with open(pat, "a") as f:
+                    f.write(time.asctime( time.localtime(time.time())) + "\t" + path + "\nKey: " + keyX.get() + "\nIV: " + ivX.get() + "\n\n")
+                popUp("Keys were saved")
+            if opt == 1:
+                pat = fd.askopenfilename(title="Save to file" )
+                with open(pat, "a") as f:
+                    f.write(time.asctime( time.localtime(time.time())) + "\t" + path + "\nKey: " + keyX.get() + "\nIV: " + ivX.get() + "\n\n")
+                popUp("Keys were saved")
         except:
             popUp("Select File ")
 
